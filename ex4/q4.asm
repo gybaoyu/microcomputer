@@ -1,0 +1,88 @@
+DATA SEGMENT
+X DB 12
+Y DB -3
+Z DB 20
+V DB 50
+DATA ENDS
+
+CODE SEGMENT
+ASSUME CS:CODE, DS:DATA
+
+PRINT_SIGNED_WORD PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+
+    CMP AX, 0
+    JGE PSW_POS
+    MOV DL, '-'
+    MOV AH, 02H
+    INT 21H
+    NEG AX
+
+PSW_POS:
+    CMP AX, 0
+    JNE PSW_DIV_PREP
+    MOV DL, '0'
+    MOV AH, 02H
+    INT 21H
+    JMP PSW_DONE
+
+PSW_DIV_PREP:
+    XOR CX, CX
+    MOV BX, 10
+
+PSW_DIV:
+    XOR DX, DX
+    DIV BX
+    PUSH DX
+    INC CX
+    CMP AX, 0
+    JNE PSW_DIV
+
+PSW_OUT:
+    POP DX
+    ADD DL, '0'
+    MOV AH, 02H
+    INT 21H
+    LOOP PSW_OUT
+
+PSW_DONE:
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+PRINT_SIGNED_WORD ENDP
+
+START:
+    MOV AX, DATA
+    MOV DS, AX
+
+    MOV AL, X
+    CBW
+    MOV BL, Y
+    IMUL BL
+    MOV BX, AX
+
+    MOV AL, Z
+    CBW
+    ADD BX, AX
+    SUB BX, 540
+
+    MOV AL, V
+    CBW
+    SUB AX, BX
+
+    MOV BL, X
+    IDIV BL
+    CBW
+
+    CALL PRINT_SIGNED_WORD
+
+    MOV AH, 4CH
+    INT 21H
+CODE ENDS
+END START
+

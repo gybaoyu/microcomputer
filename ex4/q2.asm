@@ -1,0 +1,31 @@
+DATA SEGMENT
+X    DW 10H
+SQRT DB 0
+DATA ENDS
+
+CODE SEGMENT
+ASSUME CS:CODE, DS:DATA
+START:
+    MOV AX, DATA
+    MOV DS, AX
+
+    MOV SI, OFFSET X
+    MOV AX, [SI]
+    MOV CL, 0
+    MOV DX, 1
+
+A1:
+    SUB AX, DX
+    JB A2
+    INC CL
+    JZ A2
+    ADD DX, 2
+    JMP A1
+
+A2:
+    MOV SQRT, CL
+    MOV AH, 4CH
+    INT 21H
+CODE ENDS
+END START
+
